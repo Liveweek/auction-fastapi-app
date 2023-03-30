@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "auction-project"
+version = "0.1.0"
+description = ""
+authors = ["pokonakov (VTB70171591) <pokonakov@vtb.ru>"]
+packages = [{include = "auction_project"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.0"
+sqlmodel = "^0.0.8"
+uvicorn = "^0.21.1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
+
+[tool.poetry.scripts]
+run-api = "app:start"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
