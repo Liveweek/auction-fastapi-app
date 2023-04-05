@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from database import create_db_and_tables
 
+from routes.auction_api_routes import auction_router
+from routes.auth_routes import auth_router
+from routes.moderate_routes import moderate_router
+
 app = FastAPI()
 
 app.add_middleware(
@@ -15,11 +19,9 @@ def on_startup():
     create_db_and_tables()
 
 
-from routes.auction_api_routes import auction_router
-from routes.auth_routes import auth_router
-
 app.include_router(auction_router)
 app.include_router(auth_router)
+app.include_router(moderate_router)
 
 
 def start():
@@ -34,8 +36,9 @@ def main():
     from sqlmodel import Session
     from enums import AuctionStatus
     create_db_and_tables()
+ 
     
-    
+
     # user = User( **{"username": "johndoe",
     #     "email": "johndoe@example.com",
     #     "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
