@@ -3,9 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from database import create_db_and_tables
 
-from routes.auction_api_routes import auction_router
-from routes.auth_routes import auth_router
-
 app = FastAPI()
 
 app.add_middleware(
@@ -17,6 +14,9 @@ app.add_middleware(
 def on_startup():
     create_db_and_tables()
 
+
+from routes.auction_api_routes import auction_router
+from routes.auth_routes import auth_router
 
 app.include_router(auction_router)
 app.include_router(auth_router)
