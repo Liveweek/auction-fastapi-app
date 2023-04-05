@@ -27,6 +27,7 @@ class UserRead(base.UserBase):
 
 
 class BetRead(base.BetBase):
+    id: int
     bet_user: UserRead | None = None
 
 
@@ -39,6 +40,7 @@ class AuctionFullRead(base.AuctionBase):
 class AuctionRead(base.AuctionBase):
     id: int
     
+    current_bet: float | None
     
 class Token(BaseModel):
     access_token: str

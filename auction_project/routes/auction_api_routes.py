@@ -36,8 +36,14 @@ def get_auctions(
         session: Session = Depends(get_session)
     ):
     statement = select(db.Auction).offset(offset).limit(limit)
-    results = session.exec(statement)
-    return results.all()
+    results = session.exec(statement).all()
+    
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        return auction_with_last_bet
+    
+    return list(map(get_current_bet, results))
         
     
     
@@ -67,14 +73,14 @@ def get_category_list(
         session: Session = Depends(get_session)
     ):
     statement = (select(db.Category)
-                    .limit(limit)
-                    .offset(offset))
+                    .offset(offset)
+                    .limit(limit))
     
     result = session.exec(statement)
     
     def add_cnt_of_auctions(category):
         category_with_count_of_auctions = api.CategoryWithAuctionCount(**category.dict())
-        category_with_count_of_auctions.count_of_active_auctions = len(category.auctions)
+        category_with_count_of_auctions.count_of_active_auctions = len(filter(lambda elem: elem.lot_status in (AuctionStatus.auc_open, AuctionStatus.scheduled), category.auctions))
         return category_with_count_of_auctions
     
     result = list(map(add_cnt_of_auctions, result))
@@ -98,7 +104,8 @@ def get_auctions_by_category(
 
 
 @auction_router.get('/auctions/vendor/{vendor_id}')
-
+def get_auctions_by_vendor():
+    ...
 
 
 

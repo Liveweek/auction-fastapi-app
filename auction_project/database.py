@@ -1,6 +1,5 @@
 import datetime
 from sqlmodel import SQLModel, Session, create_engine
-from auction_project.enums import AuctionStatus
 
 
 

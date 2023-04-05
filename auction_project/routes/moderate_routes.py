@@ -2,8 +2,8 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from auction_project.dependencies import get_session
-from auction_project.enums import AuctionStatus
+from dependencies import get_session
+from enums import AuctionStatus
 import models.db_model as db
 
 
