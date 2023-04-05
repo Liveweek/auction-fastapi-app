@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from database import create_db_and_tables
 
@@ -7,6 +8,10 @@ from routes.auth_routes import auth_router
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*']
+)
 
 @app.on_event("startup")
 def on_startup():
