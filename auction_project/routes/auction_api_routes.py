@@ -2,7 +2,7 @@ import datetime
 from typing import Annotated, List
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlmodel import Session, select, or_
+from sqlmodel import Session, select, or_, and_
 import sqlalchemy
 
 
@@ -103,9 +103,25 @@ def get_auctions_by_category(
 
 
 
-@auction_router.get('/auctions/vendor/{vendor_id}')
-def get_auctions_by_vendor():
-    ...
+@auction_router.get('/auctions/vendor/{vendor_id}', response_model=List[api.AuctionRead])
+def get_auctions_by_vendor(
+    *,
+    vendor_id: int,
+    session: Session = Depends(get_session)
+    ):
+    
+    statement = select(db.Auction). \
+                    where(db.Auction.lot_vendor_id == vendor_id). \
+                    order_by(db.Auction.lot_begin_datetime)
+                    
+    results = session.exec(statement)
+    
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        return auction_with_last_bet
+    
+    return list(map(get_current_bet, results))
 
 
 
