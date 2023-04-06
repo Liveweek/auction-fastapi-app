@@ -142,6 +142,29 @@ def get_auction_by_id(
         return result
     
     
+@auction_router.post('/auction', response_model=api.AuctionFullRead)
+def create_auction(
+    *,
+    auction: api.AuctionCreate,
+    session: Session = Depends(get_session),
+    current_user: db.User = Depends(get_current_user)
+    ):
+    
+    if not current_user.vendor_link:
+        return JSONResponse(402, context={"message": "У пользователя нет привязки к Вендору"})
+    
+    #TODO: добавить реализацию создания объекта аукциона
+    # + добавить модель для ввода (проприсать необходимые атрибуты)
+    auction = db.Auction()
+    
+    session.add(auction)
+    session.commit()
+    
+    session.refresh(auction)
+    
+    return auction
+    
+    
     
 @auction_router.delete('/auction/{auction_id}', response_model=api.AuctionRead)
 def delete_auction(
@@ -215,11 +238,10 @@ def buy_auction_now(
     bet = db.Bet(
         bet_datetime=datetime.datetime.now(),
         bet_size=auction.lot_hot_price,
-        auction_id=auction.id,
+        auction=auction,
         bet_user=current_user
     )
     
-    session.add(auction)
     session.add(bet)
     session.commit()
     

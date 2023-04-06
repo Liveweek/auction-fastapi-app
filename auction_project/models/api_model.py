@@ -37,6 +37,10 @@ class AuctionFullRead(base.AuctionBase):
     auction_bets: List[BetRead] = []
     
     
+class AuctionCreate(base.AuctionBase):
+    ...
+    
+    
 class AuctionRead(base.AuctionBase):
     id: int
     
