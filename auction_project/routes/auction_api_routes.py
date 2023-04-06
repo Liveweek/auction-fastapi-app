@@ -112,6 +112,8 @@ def get_auctions_by_vendor(
     
     statement = select(db.Auction). \
                     where(db.Auction.lot_vendor_id == vendor_id). \
+                    where(or_(db.Auction.lot_status == AuctionStatus.auc_open,
+                              db.Auction.lot_status == AuctionStatus.scheduled)). \
                     order_by(db.Auction.lot_begin_datetime)
                     
     results = session.exec(statement)
@@ -166,10 +168,14 @@ def make_bet(
     session: Session = Depends(get_session)
 ):
     auction = session.get(db.Auction, auction_id)
+    
     if not auction:
         return JSONResponse(404, context={"message": "Аукцион не найден"})
     
-    
+    if auction.lot_status == AuctionStatus.auc_closed:
+        return JSONResponse(402, context={"message": "Аукцион уже закрыт"})
+                                          
+
     bet = db.Bet(
         bet_datetime=datetime.datetime.now(),
         bet_size=bet_size,
@@ -181,4 +187,46 @@ def make_bet(
     session.commit()
     
     return bet
+
+
+@auction_router.post('/auction/{auction_id}/buy_now', response_model=api.AuctionRead)
+def buy_auction_now(
+    *,
+    auction_id: int,
+    current_user: db.User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+    ):
+    
+    auction = session.get(db.Auction, auction_id)
+    
+    if not auction:
+        return JSONResponse(404, context={"message": "Аукцион не найден"})
+    
+    if auction.lot_status == AuctionStatus.auc_closed:
+        return JSONResponse(402, context={"message": "Аукцион уже закрыт"})
+    
+    if not auction.lot_hot_price:
+        return JSONResponse(402, context={"message": "Аукцион нельзя выкупить"})
+    
+    auction.user_winner_id = current_user.id
+    auction.lot_status = AuctionStatus.auc_closed
+    auction.lot_end_datetime = datetime.datetime.now()
+    
+    bet = db.Bet(
+        bet_datetime=datetime.datetime.now(),
+        bet_size=auction.lot_hot_price,
+        auction_id=auction.id,
+        bet_user=current_user
+    )
+    
+    session.add(auction)
+    session.add(bet)
+    session.commit()
+    
+    # refresh auction object
+    session.refresh(auction) #TODO: надо проверить, как это работает
+    
+    return auction
+    
+    
     
