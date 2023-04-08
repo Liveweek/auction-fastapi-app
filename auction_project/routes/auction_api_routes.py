@@ -80,7 +80,7 @@ def get_category_list(
     
     def add_cnt_of_auctions(category):
         category_with_count_of_auctions = api.CategoryWithAuctionCount(**category.dict())
-        category_with_count_of_auctions.count_of_active_auctions = len(filter(lambda elem: elem.lot_status in (AuctionStatus.auc_open, AuctionStatus.scheduled), category.auctions))
+        category_with_count_of_auctions.count_of_active_auctions = len(list(filter(lambda elem: elem.lot_status in (AuctionStatus.auc_open, AuctionStatus.scheduled), category.auctions)))
         return category_with_count_of_auctions
     
     result = list(map(add_cnt_of_auctions, result))
