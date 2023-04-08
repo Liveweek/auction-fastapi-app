@@ -193,10 +193,10 @@ def make_bet(
     auction = session.get(db.Auction, auction_id)
     
     if not auction:
-        return JSONResponse(404, context={"message": "Аукцион не найден"})
+        return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
     
     if auction.lot_status == AuctionStatus.auc_closed:
-        return JSONResponse(402, context={"message": "Аукцион уже закрыт"})
+        return JSONResponse(status_code=402, content={"message": "Аукцион уже закрыт"})
                                           
 
     bet = db.Bet(
@@ -223,13 +223,13 @@ def buy_auction_now(
     auction = session.get(db.Auction, auction_id)
     
     if not auction:
-        return JSONResponse(404, context={"message": "Аукцион не найден"})
+        return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
     
     if auction.lot_status == AuctionStatus.auc_closed:
-        return JSONResponse(402, context={"message": "Аукцион уже закрыт"})
+        return JSONResponse(status_code=402, content={"message": "Аукцион уже закрыт"})
     
     if not auction.lot_hot_price:
-        return JSONResponse(402, context={"message": "Аукцион нельзя выкупить"})
+        return JSONResponse(status_code=402, content={"message": "Аукцион нельзя выкупить"})
     
     auction.user_winner_id = current_user.id
     auction.lot_status = AuctionStatus.auc_closed
@@ -248,7 +248,12 @@ def buy_auction_now(
     # refresh auction object
     session.refresh(auction) #TODO: надо проверить, как это работает
     
-    return auction
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        return auction_with_last_bet
+    
+    return get_current_bet(auction)
     
     
     
