@@ -19,4 +19,5 @@ RUN poetry install --no-interaction --no-ansi
 
 # Запускаем приложение
 WORKDIR /app/auction_project
+RUN mkdir static static/auctions static/vendor static/categories
 CMD poetry run run-api
