@@ -1,10 +1,13 @@
 import datetime
-from fastapi import APIRouter, Depends
+from typing import Annotated
+from fastapi import APIRouter, Depends, File, UploadFile, Form
 from sqlmodel import Session, delete
+import uuid
 
 from dependencies import get_session
 from enums import AuctionStatus
 import models.db_model as db
+import models.api_model as api 
 
 
 moderate_router = APIRouter(
@@ -64,3 +67,26 @@ def init_data(session: Session = Depends(get_session)):
     session.add(user)
     session.commit()
     return {'message': 'Всё готово, ПАГНА!'}
+
+
+@moderate_router.post('/category', response_model=api.CategoryRead)
+def create_category(
+        name: Annotated[str, Form()],
+        description: Annotated[str, Form()],
+        category_file: UploadFile = File(), 
+        session: Session = Depends(get_session)
+    ):
+    
+    print(category_file.filename)
+    file_type = category_file.filename.split('.')[-1]
+    data = category_file.file.read()
+    
+    category = db.Category(name=name, description=description)
+    category.category_photo_path = rf'/categories/{uuid.uuid4().__str__()}.{file_type}'
+    
+    with open('/app/auction_project/static' + category.category_photo_path, 'wb') as buffer:
+        buffer.write(data)
+        
+    session.add(category)
+    session.commit()
+    return category

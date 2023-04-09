@@ -12,7 +12,12 @@ class VendorRead(base.VendorBase):
 
 class CategoryRead(base.CategoryBase):
     id: int
-
+    
+    
+class CategoryCreate(BaseModel):
+    name:                str
+    description:         str
+    
 
 class CategoryWithAuctionCount(base.CategoryBase):
     id: int
