@@ -31,6 +31,9 @@ class CategoryWithAuctionCount(base.CategoryBase):
     count_of_active_auctions: int | None
     
 
+class UserCreate(base.UserBase):
+    password: str
+
 class UserRead(base.UserBase):
     id: int
     username: str

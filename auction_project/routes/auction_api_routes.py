@@ -1,6 +1,6 @@
 import datetime
 from typing import Annotated, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select, or_, and_
 import sqlalchemy
@@ -297,3 +297,13 @@ def get_vendor_by_id(
         return JSONResponse(status_code=404, content={"message": "Вендор не найден"})
     
     return vendor
+
+
+# @auction_router.post("/vendor", response_model=api.VendorRead)
+# def create_vendor(
+#     *,
+#     vendor_name: Annotated[str, Form()],
+#     store_name:  Annotated[str, Form()],
+#     store_phone: Annotated[str, Form()],
+#     session: Session = Depends(get_session),
+    
