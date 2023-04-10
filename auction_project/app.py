@@ -12,7 +12,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*']
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=['*']
 )
 
 @app.on_event("startup")
@@ -37,7 +39,7 @@ def main():
     from sqlmodel import Session
     from enums import AuctionStatus
     create_db_and_tables()
- 
+
     
 
     # user = User( **{"username": "johndoe",
