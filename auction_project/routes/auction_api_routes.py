@@ -284,23 +284,7 @@ def get_vendors(
     return session.exec(statement).all()
 
 
-
-@auction_router.get("/vendor/{vendor_id}", response_model=api.VendorRead)
-def get_vendor_by_id(
-    *,
-    vendor_id: int,
-    session: Session = Depends(get_session)
-    ):
-    
-    vendor = session.get(db.Vendor, vendor_id)
-    
-    if not vendor:
-        return JSONResponse(status_code=404, content={"message": "Вендор не найден"})
-    
-    return vendor
-
-
-@auction_router.post("/vendor", response_model=api.VendorRead)
+@auction_router.post("/vendors", response_model=api.VendorRead)
 def create_vendor(
     *,
     vendor_name:        Annotated[str, Form()],
@@ -340,3 +324,17 @@ def create_vendor(
     
     return vendor
     
+    
+@auction_router.get("/vendor/{vendor_id}", response_model=api.VendorRead)
+def get_vendor_by_id(
+    *,
+    vendor_id: int,
+    session: Session = Depends(get_session)
+    ):
+    
+    vendor = session.get(db.Vendor, vendor_id)
+    
+    if not vendor:
+        return JSONResponse(status_code=404, content={"message": "Вендор не найден"})
+    
+    return vendor
