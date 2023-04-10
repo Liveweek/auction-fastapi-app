@@ -77,7 +77,6 @@ def create_category(
         session: Session = Depends(get_session)
     ):
     
-    print(category_file.filename)
     file_type = category_file.filename.split('.')[-1]
     data = category_file.file.read()
     

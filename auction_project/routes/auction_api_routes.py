@@ -1,6 +1,7 @@
 import datetime
 from typing import Annotated, List
-from fastapi import APIRouter, Depends, Form
+import uuid
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select, or_, and_
 import sqlalchemy
@@ -299,11 +300,43 @@ def get_vendor_by_id(
     return vendor
 
 
-# @auction_router.post("/vendor", response_model=api.VendorRead)
-# def create_vendor(
-#     *,
-#     vendor_name: Annotated[str, Form()],
-#     store_name:  Annotated[str, Form()],
-#     store_phone: Annotated[str, Form()],
-#     session: Session = Depends(get_session),
+@auction_router.post("/vendor", response_model=api.VendorRead)
+def create_vendor(
+    *,
+    vendor_name:        Annotated[str, Form()],
+    store_name:         Annotated[str, Form()],
+    store_phone_number: Annotated[str, Form()],
+    store_site:         Annotated[str, Form()],
+    store_address:      Annotated[str, Form()],
+    vendor_photo:       UploadFile = File(),
+    current_user: db.User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    ):
+    
+    if current_user.vendor_link:
+        return JSONResponse(status_code=401, content={"message": "У данного пользователя уже есть вендор"})
+    
+    file_type = vendor_photo.filename.split('.')[-1]
+    data = vendor_photo.file.read()
+    
+    vendor = db.Vendor(
+        vendor_name        = vendor_name,
+        store_name         = store_name,
+        store_phone_number = store_phone_number,
+        store_site         = store_site,
+        store_address      = store_address,
+        user_link          = current_user
+    )
+    
+    vendor.vendor_photo_path = rf'/vendor/{uuid.uuid4().__str__()}.{file_type}'
+
+    with open('/app/auction_project/static' + vendor.vendor_photo_path, 'wb') as buffer:
+        buffer.write(data)
+        
+    session.add(vendor)
+    session.commit()
+    
+    session.refresh(vendor)
+    
+    return vendor
     
