@@ -60,9 +60,14 @@ def get_auctions_by_status(
                     .where(db.Auction.lot_status == status_code)
                     .offset(offset)
                     .limit(limit))
-    results = session.exec(statement)
+    results = session.exec(statement).all()
     
-    return results.all()
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        return auction_with_last_bet
+    
+    return list(map(get_current_bet, results))
     
     
 @auction_router.get('/auctions/category', response_model=List[api.CategoryWithAuctionCount])
@@ -98,8 +103,15 @@ def get_auctions_by_category(
                     .where(db.Auction.category_id == category_id)
                     .where(or_(db.Auction.lot_status == AuctionStatus.auc_open, 
                                db.Auction.lot_status == AuctionStatus.scheduled)))
-    result = session.exec(statement)
-    return result.all()
+    
+    results = session.exec(statement).all()
+    
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        return auction_with_last_bet
+    
+    return list(map(get_current_bet, results))
 
 
 
