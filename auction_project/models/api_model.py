@@ -8,6 +8,12 @@ import models.base_model as base
 
 class VendorRead(base.VendorBase):
     id: int
+    
+
+class VendorShortRead(BaseModel):
+    id:                int
+    vendor_name:       str
+    vendor_photo_path: str
 
 
 class CategoryRead(base.CategoryBase):
@@ -51,6 +57,12 @@ class AuctionRead(base.AuctionBase):
     
     current_bet: float | None
     
+    
+    
+class VendorFullRead(base.VendorBase):
+    ...
+    
+    
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -60,5 +72,3 @@ class TokenData(BaseModel):
     username: str | None = None
     
     
-class AuctionFilter(BaseModel):
-    ...

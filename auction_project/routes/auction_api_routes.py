@@ -267,5 +267,18 @@ def buy_auction_now(
     
     return get_current_bet(auction)
     
+
+@auction_router.get("/vendors", response_model=List[api.VendorShortRead])
+def get_vendors(
+    *,
+    offset: int = 0,
+    limit: int = 10,
+    session: Session = Depends(get_session)
+    ):
     
-    
+    statement = select(db.Vendor). \
+                    offset(offset). \
+                    limit(limit)
+                    
+    return session.exec(statement).all()
+
