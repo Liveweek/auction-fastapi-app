@@ -59,10 +59,6 @@ class AuctionRead(base.AuctionBase):
     
     
     
-class VendorFullRead(base.VendorBase):
-    ...
-    
-    
 class Token(BaseModel):
     access_token: str
     token_type: str
