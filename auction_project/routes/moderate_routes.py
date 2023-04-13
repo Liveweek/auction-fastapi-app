@@ -1,6 +1,7 @@
 import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, File, UploadFile, Form
+from fastapi.responses import JSONResponse
 from sqlmodel import Session, delete
 import uuid
 
@@ -8,6 +9,7 @@ from dependencies import get_session
 from enums import AuctionStatus
 import models.db_model as db
 import models.api_model as api 
+import models.base_model as base
 
 
 moderate_router = APIRouter(
@@ -89,3 +91,48 @@ def create_category(
     session.add(category)
     session.commit()
     return category
+
+
+@moderate_router.post('/auction/{auction_id}/accept', response_model=base.AuctionBase)
+def accept_auction(
+        *,
+        auction_id: int,
+        session: Session = Depends(get_session)
+    ):
+    
+    auction = session.get(db.Auction, auction_id)
+    
+    
+    if not auction:
+        return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
+    
+    auction.lot_status = AuctionStatus.scheduled        
+    # TODO: добавить две таски Celery на открытие/закрытие аука по времени
+    
+    session.add(auction)
+    session.commit()
+    
+    return auction
+    
+    
+    
+@moderate_router.post('/auction/{auction_id}/decline')
+def decline_auction(
+     *,
+        auction_id: int,
+        session: Session = Depends(get_session)
+    ):
+    
+    auction = session.get(db.Auction, auction_id)
+    
+    
+    if not auction:
+        return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
+    
+    auction.lot_status = AuctionStatus.auc_closed        
+    
+    session.add(auction)
+    session.commit()
+    
+    return auction
+    
