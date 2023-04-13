@@ -93,6 +93,14 @@ def get_category_list(
     
     return result
 
+
+@auction_router.get('/auctions/category_short', response_model=List[api.CategoryShortRead])
+def get_short_list_of_categories(
+        *,
+        session: Session = Depends(get_session)
+    ):
+
+    return session.exec(select(db.Category)).all()
     
 @auction_router.get('/auctions/category/{category_id}', response_model=List[api.AuctionRead])
 def get_auctions_by_category(
@@ -120,7 +128,7 @@ def get_auctions_by_category(
 def get_auctions_by_vendor(
     *,
     vendor_id: int,
-    session: Session = Depends(get_session)
+    session:   Session = Depends(get_session)
     ):
     
     statement = select(db.Auction). \
@@ -158,17 +166,41 @@ def get_auction_by_id(
 @auction_router.post('/auction', response_model=api.AuctionFullRead)
 def create_auction(
     *,
-    auction: api.AuctionCreate,
-    session: Session = Depends(get_session),
-    current_user: db.User = Depends(get_current_user)
+    lot_category_id:    Annotated[int, Form()],
+    lot_name:           Annotated[str, Form()],
+    lot_description:    Annotated[str, Form()],
+    lot_min_bet:        Annotated[float, Form()],
+    lot_hot_price:      Annotated[float, Form()],
+    lot_begin_datetime: Annotated[datetime.datetime, Form()],
+    lot_end_datetime:   Annotated[datetime.datetime, Form()],
+    lot_photo:          UploadFile = File(),
+    session:            Session = Depends(get_session),
+    current_user:       db.User = Depends(get_current_user)
     ):
     
     if not current_user.vendor_link:
         return JSONResponse(402, context={"message": "У пользователя нет привязки к Вендору"})
+
+    file_type = lot_photo.filename.split('.')[-1]
+    data = lot_photo.file.read()
+
+    auction = db.Auction(
+        lot_name=           lot_name,
+        lot_description=    lot_description,
+        lot_min_bet=        lot_min_bet,
+        lot_hot_price=      lot_hot_price,
+        lot_status=         AuctionStatus.on_moderate,
+        lot_begin_datetime= lot_begin_datetime,
+        lot_end_datetime=   lot_end_datetime,
+        lot_vendor=         current_user.vendor_link,
+        category_id=        lot_category_id
+    )
     
-    #TODO: добавить реализацию создания объекта аукциона
-    # + добавить модель для ввода (проприсать необходимые атрибуты)
-    auction = db.Auction()
+    auction.lot_photo_path = rf'/auctions/{uuid.uuid4().__str__()}.{file_type}'
+    
+    with open('/app/auction_project/static' + auction.lot_photo_path, 'wb') as buffer:
+        buffer.write(data)
+        
     
     session.add(auction)
     session.commit()
@@ -208,9 +240,11 @@ def make_bet(
     if not auction:
         return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
     
-    if auction.lot_status == AuctionStatus.auc_closed:
+    if auction.lot_status != AuctionStatus.auc_open:
         return JSONResponse(status_code=402, content={"message": "Аукцион уже закрыт"})
-                                          
+
+    if auction.lot_vendor == current_user.vendor_link:
+        return JSONResponse(status_code=402, content={"message": "Вы не можете поставить ставку на свой лот"})
 
     bet = db.Bet(
         bet_datetime=datetime.datetime.now(),
@@ -238,11 +272,15 @@ def buy_auction_now(
     if not auction:
         return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
     
-    if auction.lot_status == AuctionStatus.auc_closed:
-        return JSONResponse(status_code=402, content={"message": "Аукцион уже закрыт"})
+    if auction.lot_status != AuctionStatus.auc_open:
+        return JSONResponse(status_code=402, content={"message": "Аукцион нельзя выкупить, когда он не открыт"})
     
     if not auction.lot_hot_price:
         return JSONResponse(status_code=402, content={"message": "Аукцион нельзя выкупить"})
+    
+    if auction.lot_vendor == current_user.vendor_link:
+        return JSONResponse(status_code=402, content={"message": "Вы не в праве покупать свой аукцион"})
+    
     
     auction.user_winner_id = current_user.id
     auction.lot_status = AuctionStatus.auc_closed
@@ -293,8 +331,8 @@ def create_vendor(
     store_site:         Annotated[str, Form()],
     store_address:      Annotated[str, Form()],
     vendor_photo:       UploadFile = File(),
-    current_user: db.User = Depends(get_current_user),
-    session: Session = Depends(get_session),
+    current_user:       db.User = Depends(get_current_user),
+    session:            Session = Depends(get_session),
     ):
     
     if current_user.vendor_link:

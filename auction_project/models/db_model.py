@@ -49,7 +49,7 @@ class User(base.UserBase, table=True):
     id:              Optional[int] = Field(default=None, primary_key=True)
     
     hashed_password: str
-    vendor_link:     Optional["Vendor"] = Relationship(back_populates="user_link")
+    vendor_link:     Optional["Vendor"] = Relationship(back_populates="user_link", sa_relationship_kwargs={'uselist': False})
     bets_history:    List[Bet] = Relationship(back_populates="bet_user")
     
     
@@ -59,7 +59,7 @@ class Vendor(base.VendorBase, table=True):
     auctions:           List[Auction] = Relationship(back_populates="lot_vendor")
     
     user_id:            Optional[int] = Field(default=None, foreign_key="user.id")
-    user_link:          Optional[User] = Relationship(back_populates="vendor_link")
+    user_link:          Optional[User] = Relationship(back_populates="vendor_link", sa_relationship_kwargs={'uselist': False})
     
     
     

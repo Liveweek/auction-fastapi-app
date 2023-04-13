@@ -20,6 +20,10 @@ class CategoryRead(base.CategoryBase):
     id: int
     
     
+class CategoryShortRead(BaseModel):
+    id:   int
+    name: str
+    
 class CategoryCreate(BaseModel):
     name:                str
     description:         str
@@ -49,10 +53,6 @@ class AuctionFullRead(base.AuctionBase):
     lot_vendor: VendorRead | None = None
     category: CategoryRead | None = None
     auction_bets: List[BetRead] = []
-    
-    
-class AuctionCreate(base.AuctionBase):
-    ...
     
     
 class AuctionRead(base.AuctionBase):
