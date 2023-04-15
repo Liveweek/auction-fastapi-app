@@ -15,6 +15,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
 celery = "^5.2.7"
 redis = "^4.5.4"
+websockets = "^11.0.1"
 
 [tool.poetry.scripts]
 run-api = "auction_project.app:start"

@@ -24,6 +24,7 @@ def open_auction(auction_id: int):
             
 @worker.task
 def close_auction(auction_id: int):
+    
     with Session(engine) as session:
         auction = session.get(db.Auction, auction_id)
         

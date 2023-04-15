@@ -113,7 +113,12 @@ def accept_auction(
     auction.lot_status = AuctionStatus.scheduled        
     
     auction_worker.open_auction.apply_async(
-        eta=datetime.datetime.now() + datetime.timedelta(seconds=15),
+        eta=auction.lot_begin_datetime,
+        args=(auction.id,)
+    )
+    
+    auction_worker.close_auction.apply_async(
+        eta=auction.lot_end_datetime,
         args=(auction.id,)
     )
     
