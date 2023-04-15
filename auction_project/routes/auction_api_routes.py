@@ -41,7 +41,11 @@ def get_auctions(
     
     def get_current_bet(auction):
         auction_with_last_bet = api.AuctionRead(**auction.dict())
-        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
         return auction_with_last_bet
     
     return list(map(get_current_bet, results))
@@ -65,7 +69,11 @@ def get_auctions_by_status(
     
     def get_current_bet(auction):
         auction_with_last_bet = api.AuctionRead(**auction.dict())
-        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
         return auction_with_last_bet
     
     return list(map(get_current_bet, results))
@@ -117,7 +125,11 @@ def get_auctions_by_category(
     
     def get_current_bet(auction):
         auction_with_last_bet = api.AuctionRead(**auction.dict())
-        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
         return auction_with_last_bet
     
     return list(map(get_current_bet, results))
@@ -141,7 +153,11 @@ def get_auctions_by_vendor(
     
     def get_current_bet(auction):
         auction_with_last_bet = api.AuctionRead(**auction.dict())
-        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
         return auction_with_last_bet
     
     return list(map(get_current_bet, results))
@@ -301,7 +317,11 @@ def buy_auction_now(
     
     def get_current_bet(auction):
         auction_with_last_bet = api.AuctionRead(**auction.dict())
-        auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
         return auction_with_last_bet
     
     return get_current_bet(auction)

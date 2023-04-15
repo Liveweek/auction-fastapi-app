@@ -5,11 +5,15 @@ from fastapi.responses import JSONResponse
 from sqlmodel import Session, delete
 import uuid
 
+
 from dependencies import get_session
 from enums import AuctionStatus
 import models.db_model as db
 import models.api_model as api 
 import models.base_model as base
+
+
+import auction_worker
 
 
 moderate_router = APIRouter(
@@ -107,7 +111,12 @@ def accept_auction(
         return JSONResponse(status_code=404, content={"message": "Аукцион не найден"})
     
     auction.lot_status = AuctionStatus.scheduled        
-    # TODO: добавить две таски Celery на открытие/закрытие аука по времени
+    
+    auction_worker.open_auction.apply_async(
+        eta=datetime.datetime.now() + datetime.timedelta(seconds=15),
+        args=(auction.id,)
+    )
+    
     
     session.add(auction)
     session.commit()
@@ -135,4 +144,12 @@ def decline_auction(
     session.commit()
     
     return auction
+
+
+@moderate_router.get('/test')
+def run_celery():
+    auction_worker.print_sus.apply_async(eta=datetime.datetime.now() + datetime.timedelta(seconds=15))
+    
+    return {"message": "SUUUUUUUUUUUUUUUS"}
+    
     

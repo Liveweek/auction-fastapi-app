@@ -6,6 +6,10 @@ ENV PYTHONUNBUFFERED 1
 # Копируем файлы проекта в контейнер
 WORKDIR /app
 COPY pyproject.toml /app
+COPY start_worker.sh /app
+RUN chmod +x start_worker.sh
+
+
 COPY /auction_project /app/auction_project
 
 ENV PYTHONPATH=${PYTHONPATH}:${PWD} 
@@ -19,5 +23,5 @@ RUN poetry install --no-interaction --no-ansi
 
 # Запускаем приложение
 WORKDIR /app/auction_project
-RUN mkdir static static/auctions static/vendor static/categories
-CMD poetry run run-api
+CMD mkdir -p static static/auctions static/vendor static/categories
+CMD /app/start_worker.sh && poetry run run-api
