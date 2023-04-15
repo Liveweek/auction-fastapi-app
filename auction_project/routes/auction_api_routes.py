@@ -1,4 +1,5 @@
 import datetime
+import json
 from typing import Annotated, List
 import uuid
 from fastapi import APIRouter, Depends, File, Form, UploadFile
@@ -6,11 +7,10 @@ from fastapi.responses import JSONResponse
 from sqlmodel import Session, select, or_, and_
 import sqlalchemy
 
-
 import models.db_model as db
 import models.api_model as api
 from utils.auth_utils import get_current_user
-
+from utils.socket_utils import redis_conn
 
 from dependencies import get_session
 from enums import AuctionStatus
@@ -267,6 +267,20 @@ def make_bet(
         bet_size=bet_size,
         auction=auction,
         bet_user=current_user
+    )
+    
+    rds = redis_conn()
+    rds.publish(
+        'channel', 
+        json.dumps({
+            "auction_id": str(auction.id),
+            "data": {
+                "event_type": "bet",
+                "datetime": str(datetime.datetime.now()),
+                "user": current_user.username,
+                "bet_size": str(bet_size)
+            }
+        })
     )
     
     session.add(bet)

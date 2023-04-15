@@ -1,9 +1,15 @@
+import datetime
+import json
 from celery import Celery
+import redis
 from sqlmodel import Session
 
 import models.db_model as db
 from enums import AuctionStatus
 from database import engine
+
+from utils.socket_utils import redis_conn
+
 
 worker = Celery('auction_worker', broker='redis://default:redispw@redis_broker:6379')
 
@@ -20,6 +26,17 @@ def open_auction(auction_id: int):
         session.add(auction)
         session.commit()
             
+        rds = redis.StrictRedis('redis-socket')
+        rds.publish(
+            'channel',
+            json.dumps({
+                "auction_id": str(auction_id),
+                "data" : {
+                    "event_type": "open",
+                    "datetime": str(datetime.datetime.now())
+                }
+            })
+        )
             
             
 @worker.task
@@ -33,6 +50,18 @@ def close_auction(auction_id: int):
             
         session.add(auction)
         session.commit()
+        
+        rds = redis.StrictRedis('redis-socket')
+        rds.publish(
+            'channel',
+            json.dumps({
+                "auction_id": str(auction_id),
+                "data" : {
+                    "event_type": "close",
+                    "datetime": str(datetime.datetime.now())
+                }
+            })
+        )
         
 
 @worker.task

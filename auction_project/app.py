@@ -11,12 +11,11 @@ from routes.auction_api_routes import auction_router
 from routes.auth_routes import auth_router
 from routes.moderate_routes import moderate_router
 
-from utils.socket_utils import ConnectionManager
+from utils.socket_utils import ConnectionManager, redis_conn
 
 app = FastAPI()
-rds = redis.StrictRedis('redis-socket')
 
-manager = ConnectionManager(rds)
+manager = ConnectionManager(redis_conn())
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,9 +34,9 @@ def on_startup():
 @app.websocket("/ws/{auction_id}")
 async def websocket_endpoint(websocket: WebSocket, auction_id: str):
     await manager.connect(websocket, auction_id)
-    await websocket.send_json({"message": "Hello!"})
     while True:
         try:
+            await websocket.send_json({"message": "Hello!"})  
             data = await websocket.receive_json()
             print(data)
         except WebSocketDisconnect:

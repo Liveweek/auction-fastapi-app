@@ -1,8 +1,15 @@
 import asyncio
 from collections import defaultdict
+from functools import lru_cache
 import json
 
 from fastapi import WebSocket
+import redis
+
+
+@lru_cache(maxsize=1)
+def redis_conn():
+    return redis.StrictRedis('redis-socket')
 
 
 class ConnectionManager:
@@ -36,7 +43,5 @@ class ConnectionManager:
             await asyncio.sleep(0.01)
             message = sub.get_message(ignore_subscribe_messages=True)
             if message is not None and isinstance(message, dict):
-                
-                # ЧТО ЗА СООБЩЕНИЕ БУДЕТ ????
                 msg = json.loads(message.get('data'))
-                await self.broadcast(msg['message'], msg['auction_id'])
+                await self.broadcast(msg['data'], msg['auction_id'])
