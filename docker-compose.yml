@@ -1,0 +1,39 @@
+version: '3'
+services:
+  rest-api:
+    container_name: auction-api
+    image: auction-api 
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./auction_project:/app/auction_project
+    networks:
+      - "auction-network"
+    depends_on:
+      - "redis-broker"
+      - "redis-socket"
+
+  redis-broker:
+    container_name: redis-broker
+    image: redis
+    networks:
+      - "auction-network"
+
+  redis-socket:
+    container_name: redis-socket
+    image: redis
+    networks:
+      - "auction-network"
+
+networks:
+  auction-network: {}
+
+
+    
+
+  
+
+

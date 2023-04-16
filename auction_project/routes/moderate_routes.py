@@ -149,12 +149,5 @@ def decline_auction(
     session.commit()
     
     return auction
-
-
-@moderate_router.get('/test')
-def run_celery():
-    auction_worker.print_sus.apply_async(eta=datetime.datetime.now() + datetime.timedelta(seconds=15))
-    
-    return {"message": "SUUUUUUUUUUUUUUUS"}
     
     

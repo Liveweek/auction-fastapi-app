@@ -11,7 +11,7 @@ from database import engine
 from utils.socket_utils import redis_conn
 
 
-worker = Celery('auction_worker', broker='redis://default:redispw@redis_broker:6379')
+worker = Celery('auction_worker', broker='redis://default:redispw@redis-broker:6379')
 
 
 @worker.task
