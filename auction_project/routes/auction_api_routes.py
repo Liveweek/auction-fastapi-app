@@ -163,6 +163,31 @@ def get_auctions_by_vendor(
     return list(map(get_current_bet, results))
 
 
+@auction_router.get('/auctions/user', response_model=List[api.AuctionRead])
+def get_auction_won_by_user(
+    *,
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: db.User = Depends(get_current_user)
+    ):
+    
+    statement = select(db.Auction). \
+                    where(db.Auction.user_winner_id == current_user.id)
+    
+    results = session.exec(statement)
+    
+    def get_current_bet(auction):
+        auction_with_last_bet = api.AuctionRead(**auction.dict())
+        if len(auction.auction_bets) > 0:
+            auction_with_last_bet.current_bet = auction.auction_bets[-1].bet_size
+        else:
+            auction_with_last_bet.current_bet = auction.lot_min_bet
+            
+        return auction_with_last_bet
+    
+    return list(map(get_current_bet, results))
+    
+    
 
 @auction_router.get('/auction/{auction_id}', response_model=api.AuctionFullRead)
 def get_auction_by_id(
