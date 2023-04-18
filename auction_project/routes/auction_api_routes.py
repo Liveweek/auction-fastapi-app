@@ -276,7 +276,7 @@ def make_bet(
             "auction_id": str(auction.id),
             "data": {
                 "event_type": "bet",
-                "datetime": str(datetime.datetime.now()),
+                "datetime": datetime.datetime.now().strftime('%Y-%m-%dT%H:%m:%S.%f'),
                 "user": current_user.username,
                 "bet_size": str(bet_size)
             }

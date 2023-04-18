@@ -33,7 +33,7 @@ def open_auction(auction_id: int):
                 "auction_id": str(auction_id),
                 "data" : {
                     "event_type": "open",
-                    "datetime": str(datetime.datetime.now())
+                    "datetime": datetime.datetime.now().strftime('%Y-%m-%dT%H:%m:%S.%f')
                 }
             })
         )
@@ -58,7 +58,7 @@ def close_auction(auction_id: int):
                 "auction_id": str(auction_id),
                 "data" : {
                     "event_type": "close",
-                    "datetime": str(datetime.datetime.now())
+                    "datetime": datetime.datetime.now().strftime('%Y-%m-%dT%H:%m:%S.%f')
                 }
             })
         )

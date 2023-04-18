@@ -2,6 +2,7 @@ FROM python:3.10-slim
 
 # Настраиваем переменную окружения PYTHONUNBUFFERED, чтобы скрипты Python работали корректно в контейнере
 ENV PYTHONUNBUFFERED 1
+ENV TZ='Europe/Moscow'
 
 # Копируем файлы проекта в контейнер
 WORKDIR /app

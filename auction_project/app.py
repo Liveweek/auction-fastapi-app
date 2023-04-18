@@ -36,9 +36,7 @@ async def websocket_endpoint(websocket: WebSocket, auction_id: str):
     await manager.connect(websocket, auction_id)
     while True:
         try:
-            await websocket.send_json({"message": "Hello!"})  
             data = await websocket.receive_json()
-            print(data)
         except WebSocketDisconnect:
             manager.disconnect(websocket, auction_id)
         except RuntimeError:
