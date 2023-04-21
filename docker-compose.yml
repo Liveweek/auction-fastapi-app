@@ -19,12 +19,16 @@ services:
   redis-broker:
     container_name: redis-broker
     image: redis
+    environment:
+      TZ: "Europe/Moscow"
     networks:
       - "auction-network"
 
   redis-socket:
     container_name: redis-socket
     image: redis
+    environment:
+      TZ: "Europe/Moscow"
     networks:
       - "auction-network"
 

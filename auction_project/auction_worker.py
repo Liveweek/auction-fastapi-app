@@ -11,7 +11,7 @@ from database import engine
 from utils.socket_utils import redis_conn
 
 
-worker = Celery('auction_worker', broker='redis://default:redispw@redis-broker:6379')
+worker = Celery('auction_worker', broker='redis://redis-broker:6379/0')
 
 
 @worker.task
@@ -25,7 +25,6 @@ def open_auction(auction_id: int):
             
         session.add(auction)
         session.commit()
-            
         rds = redis.StrictRedis('redis-socket')
         rds.publish(
             'channel',
@@ -63,7 +62,3 @@ def close_auction(auction_id: int):
             })
         )
         
-
-@worker.task
-def print_sus():
-    print('suuuuuuuuuuuuuuuuuuuuuuuus')

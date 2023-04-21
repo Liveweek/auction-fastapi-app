@@ -113,15 +113,14 @@ def accept_auction(
     auction.lot_status = AuctionStatus.scheduled        
     
     auction_worker.open_auction.apply_async(
-        eta=auction.lot_begin_datetime,
-        args=(auction.id,)
+        eta=auction.lot_begin_datetime - datetime.timedelta(hours=3),
+        kwargs={"auction_id": auction.id}
     )
     
     auction_worker.close_auction.apply_async(
-        eta=auction.lot_end_datetime,
-        args=(auction.id,)
+        eta=auction.lot_end_datetime - datetime.timedelta(hours=3),
+        kwargs={"auction_id": auction.id}
     )
-    
     
     session.add(auction)
     session.commit()
@@ -149,5 +148,3 @@ def decline_auction(
     session.commit()
     
     return auction
-    
-    
