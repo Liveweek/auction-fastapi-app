@@ -166,7 +166,6 @@ def get_auctions_by_vendor(
 @auction_router.get('/auctions/user', response_model=List[api.AuctionRead])
 def get_auction_won_by_user(
     *,
-    user_id: int,
     session: Session = Depends(get_session),
     current_user: db.User = Depends(get_current_user)
     ):
