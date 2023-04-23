@@ -47,6 +47,9 @@ def close_auction(auction_id: int):
         if auction and auction.lot_status == AuctionStatus.auc_open:
             auction.lot_status = AuctionStatus.auc_closed
             
+            if len(auction.auction_bets):
+                auction.user_winner_id = auction.auction_bets[-1].bet_user_id
+            
         session.add(auction)
         session.commit()
         
