@@ -11,6 +11,7 @@ from enums import AuctionStatus
 import models.db_model as db
 import models.api_model as api 
 import models.base_model as base
+from utils.auth_utils import get_password_hash
 
 
 import auction_worker
@@ -32,47 +33,37 @@ def init_data(session: Session = Depends(get_session)):
     
     session.commit()
     
-    
-    c = db.Category(
-        name="Шляпы",
-        description="Они всем как раз",
-        category_photo_path="/categories/ssss"
-    )
     v = db.Vendor(
-        vendor_name="Алладин ебучий",
+        vendor_name="Али Баба",
         store_name="Магазин у Али Бабы",
         store_phone_number="22-22-888",
-        store_site=r"http://www.google.com",
-        vendor_photo_path="/vendor/123123"
+        store_site=r"http://www.google.com"
     )
-    a = db.Auction(
-        lot_name="Шляпа султана",
-        lot_description="Ебаная шляпа султана",
-        lot_min_bet=11.5,
-        lot_hot_price=2000,
-        lot_status=AuctionStatus.auc_open,
-        category=c,
-        lot_vendor=v
-    )
-    b1 = db.Bet(
-        bet_datetime=datetime.datetime.now(),
-        bet_size=100.
-    )
-    b2 = db.Bet(
-        bet_datetime=datetime.datetime.now(),
-        bet_size=200.
-    )
-    a.auction_bets.extend([b1, b2])
     
-    session.add(a)
+    vendor_user = db.User(
+        username="vendor",
+        email="vendor_user@mail.ru",
+        hashed_password=get_password_hash("vendor"),
+        vendor_link=v
+    )
     
-    user = db.User( **{"username": "johndoe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-    })
-    session.add(user)
+    user1 = db.User(
+        username="sss",
+        email="sss@sss.com",
+        hashed_password=get_password_hash("sss")
+    )    
+    
+    user2 = db.User(
+        username="ddd",
+        email="ddd@ddd.com",
+        hashed_password=get_password_hash("ddd")
+    )
+    
+    session.add(vendor_user)
+    session.add(user1)
+    session.add(user2)
     session.commit()
-    return {'message': 'Всё готово, ПАГНА!'}
+    return {'message': 'Тестовые данные успешно инициализированы!'}
 
 
 @moderate_router.post('/category', response_model=api.CategoryRead)
@@ -129,7 +120,7 @@ def accept_auction(
     
     
     
-@moderate_router.post('/auction/{auction_id}/decline')
+@moderate_router.post('/auction/{auction_id}/decline', response_model=base.AuctionBase)
 def decline_auction(
      *,
         auction_id: int,

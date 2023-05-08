@@ -3,9 +3,6 @@ import datetime
 from enum import Enum
 
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, String
-
-import enums
 
 import models.base_model as base
 
@@ -46,6 +43,7 @@ class Bet(base.BetBase, table=True):
     
     
 class User(base.UserBase, table=True):
+    """Класс пользователя платформы аукциона"""
     id:              Optional[int] = Field(default=None, primary_key=True)
     
     hashed_password: str
@@ -54,6 +52,7 @@ class User(base.UserBase, table=True):
     
     
 class Vendor(base.VendorBase, table=True):
+    """Класс вендора аукционов"""
     id:                 Optional[int] = Field(default=None, primary_key=True)
     
     auctions:           List[Auction] = Relationship(back_populates="lot_vendor")
