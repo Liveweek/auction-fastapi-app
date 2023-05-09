@@ -13,7 +13,7 @@ class VendorRead(base.VendorBase):
 class VendorShortRead(BaseModel):
     id:                int
     vendor_name:       str
-    vendor_photo_path: str
+    vendor_photo_path: str | None
 
 
 class CategoryRead(base.CategoryBase):
@@ -42,6 +42,7 @@ class UserRead(base.UserBase):
     id: int
     username: str
     email: str
+    vendor_link: VendorRead | None
 
 
 class BetRead(base.BetBase):
